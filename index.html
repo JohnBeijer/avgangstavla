@@ -20,28 +20,35 @@ h1{font-size:15px;font-weight:500;color:#777;margin-bottom:4px;letter-spacing:.0
 .warn.high .warn-title{color:#ffaa44}
 .warn.medium .warn-title{color:#dddd44}
 .warn-body{color:#ccc}
-.sec-lbl{font-size:11px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:.08em;padding:12px 4px 6px}
+.sec-lbl{font-size:13px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.08em;padding:16px 4px 8px}
+.sec-lbl.akuta{color:#E24B4A;font-size:16px;animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:8px;margin-bottom:4px}
+.grid.akuta-grid{grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
 .card{background:#2a2a2a;border-radius:10px;padding:12px 14px}
 .card.urgent{border:1px solid #7a2020}
 .card.warn-border{border:1px solid #7a4a00}
 .card-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
 .card-name{font-size:15px;font-weight:500;color:#f0f0f0}
+.akuta-grid .card-name{font-size:18px}
+.akuta-grid .pct-main{font-size:17px}
+.akuta-grid .card{padding:16px 18px}
+.akuta-grid .c-bar-outer{height:14px}
 .card-time{font-size:13px;color:#888}
 .utl-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .utl-badge{font-size:11px;padding:2px 8px;border-radius:4px;background:#1e2a1e;color:#7ec87e;letter-spacing:.03em;font-weight:500}
 .kollin-badge{font-size:11px;color:#888}
 .kollin-badge span{font-weight:700;color:#85B7EB}
-.c-bar-outer{height:10px;background:#3a3a3a;border-radius:5px;overflow:hidden;margin-bottom:6px;display:flex}
-.c-bar-done{height:100%;background:#4CAF50;opacity:.8}
-.c-bar-kvar{height:100%;opacity:.9}
+.c-bar-outer{height:10px;background:#3a3a3a;border-radius:5px;overflow:hidden;margin-bottom:6px;position:relative}
+.c-bar-done{position:absolute;left:0;top:0;height:100%;background:#4CAF50;opacity:.8}
+.c-bar-kvar{position:absolute;right:0;top:0;height:100%;opacity:.9}
 .pct-row{display:flex;justify-content:flex-end;align-items:baseline;gap:8px;margin-bottom:10px}
 .pct-main{font-size:14px;font-weight:500}
 .pct-detail{font-size:11px;color:#888}
 .type-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .type-lbl{font-size:11px;color:#888;width:72px;flex-shrink:0}
-.type-bar-outer{flex:1;height:6px;background:#3a3a3a;border-radius:3px;overflow:hidden}
-.type-bar-inner{height:100%;border-radius:3px;opacity:.8}
+.type-bar-outer{flex:1;height:6px;background:#3a3a3a;border-radius:3px;overflow:hidden;position:relative}
+.type-bar-inner{position:absolute;left:0;top:0;height:100%;border-radius:3px;opacity:.8}
 .type-pct{font-size:11px;width:36px;text-align:right;flex-shrink:0}
 .pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
 .pill{font-size:11px;padding:3px 8px;border-radius:20px;white-space:nowrap}
@@ -139,7 +146,7 @@ const data=[
 ];
 
 function barCol(pct){
-  if(pct>=80)return'#E24B4A';if(pct>=65)return'#EF9F27';if(pct>=45)return'#BA7517';return'#4CAF50';
+  if(pct>=80)return'#E24B4A';if(pct>=65)return'#EF9F27';if(pct>0)return'#BA7517';return'#4CAF50';
 }
 function pillStyle(name){
   if(name.startsWith('Autostore'))return'background:#1a3a5c;color:#85B7EB';
@@ -180,10 +187,14 @@ const warnEl=document.getElementById('warnings');
 const cardRoot=document.getElementById('cardview');
 data.forEach(sec=>{
   const lbl=document.createElement('div');
-  lbl.className='sec-lbl';lbl.textContent=sec.sec;
+  const isAkuta = sec.sec.toLowerCase().includes('akuta');
+  lbl.className='sec-lbl' + (isAkuta ? ' akuta' : '');
+  lbl.textContent = isAkuta ? '🚨 ' + sec.sec : sec.sec;
+  lbl.style.cssText = isAkuta ? 'color:#E24B4A' : '';
   cardRoot.appendChild(lbl);
   const grid=document.createElement('div');
-  grid.className='grid';cardRoot.appendChild(grid);
+  grid.className='grid' + (isAkuta ? ' akuta-grid' : '');
+  cardRoot.appendChild(grid);
 
   sec.deps.forEach(d=>{
     const c=barCol(d.pct),fc=barCol(d.fil),ac=barCol(d.ansk);
@@ -223,9 +234,7 @@ data.forEach(sec=>{
         <span class="utl-badge">${ss.utl}</span>
         <span class="kollin-badge">Kollin skapade: <span>${ss.totalt}</span></span>
       </div>
-      <div class="c-bar-outer">
-        <div class="c-bar-done" style="width:${(100-d.pct).toFixed(1)}%"></div>
-        <div class="c-bar-kvar" style="width:${d.pct}%;background:${c}"></div>
+      <div class="c-bar-outer"><div class="c-bar-done" style="width:${(100-d.pct).toFixed(1)}%"></div><div class="c-bar-kvar" style="width:${d.pct.toFixed(1)}%;background:${c}"></div>
       </div>
       <div class="pct-row">
         <span class="pct-main" style="color:${c}">${d.pct}% kvar</span>
